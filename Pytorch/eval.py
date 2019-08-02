@@ -29,7 +29,7 @@ parser.add_argument('--dataset', '-d', default='ICDAR2015',
                                                                     type=str, help='evaluation dataset')
 parser.add_argument('--tune_from', '-t', default='./model/ICDAR2015_TextBoxes.pth',
                                                                     type=str, help='pre-trained weight')
-parser.add_argument('--output_zip', '-o', default='_result',
+parser.add_argument('--output_zip', '-o', default='_result.zip',
                                                                     type=str, help='evaluation zip output')
 parser.add_argument('--save_img', '-s', default=1,
                                                                     type=str2bool, help='save output image')
@@ -154,7 +154,7 @@ for n, _img in enumerate(val_list):
             f.write("%d,%d,%d,%d\n" % (xmin, ymin, xmax, ymax))
 
     f.close()
-    result_zip.write(args.output_zip + "/" + save_file + '.zip', save_file, compress_type=zipfile.ZIP_DEFLATED)
+    result_zip.write(filename=args.output_zip + "/" + save_file, arcname=save_file, compress_type=zipfile.ZIP_DEFLATED)
     os.remove(args.output_zip + "/res_%s.txt" % (_img[:-4]))
 
 result_zip.close()
@@ -170,4 +170,5 @@ import subprocess
 # delete the txt dir
 #subprocess.call("rm -rf " + args.output_zip, shell=True)
 
-print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" % (FLAGS.tune_from, FLAGS.input_size, FLAGS.cls_thresh, FLAGS.nms_thresh ))
+print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" %
+      (args.tune_from, args.input_size, args.cls_thresh, args.nms_thresh ))
