@@ -65,8 +65,8 @@ multi_scale = np.array(_multi_scale)
 for n, _img in enumerate(val_list):
     #print("infer : %d / %d" % (n, len(val_list)), end='\r')
     save_file = "res_%s.txt" % (_img[:-4])
-    print("save [%d/%d] %s" % (n, len(val_list), save_file), end='\r')
     f = open(args.output_zip + "/res_%s.txt" % (_img[:-4]), "w")
+    print("save [%d/%d] %s" % (n, len(val_list), save_file), end='\r')
 
     img = cv2.imread(img_dir + _img)
     height, width, _ = img.shape
@@ -109,9 +109,12 @@ for n, _img in enumerate(val_list):
 
         for label in gt_anno:
             if args.dataset in ["ICDAR2015"]:
+                # ICDAR2015 -> 8 coordinates
                 _x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3, txt = label.split(",")[:9]
+                # green -> recognition required gt label. (b,g,r)
                 color = (0, 255, 0)
                 if "###" in txt:
+                    # yellow -> unconcerned gt label. (b,g,r)
                     color = (0, 255, 255)
 
                 try:
@@ -123,10 +126,12 @@ for n, _img in enumerate(val_list):
                 gt_point = gt_point.reshape(-1, 4, 2)
                 img = cv2.polylines(img, [gt_point], True, color, 2)
             else:
+                # ICDAR2013 -> 4 coordinates
                 _xmin, _ymin, _xmax, _ymax = label.split(",")[:4]
                 img = cv2.rectangle(img, (int(_xmin), int(_ymin)), (int(_xmax), int(_ymax)), (0,255,0), 2)
 
         if args.dataset in ["ICDAR2015"]:
+            # red -> prediction. (b,g,r)
             img = cv2.polylines(img, quad_boxes, True, (0,0,255), 2)
         else:
             for quad in quad_boxes:
@@ -139,15 +144,17 @@ for n, _img in enumerate(val_list):
         save_img_dir = args.save_img_dir
         if not os.path.exists(save_img_dir):
             os.mkdir(save_img_dir)
-        img_save_path = os.path.join(save_img_dir,_img)
+        # save the output processed image.
+        img_save_path = os.path.join(save_img_dir, _img)
         #print(img_save_path)
         cv2.imwrite(img_save_path, img)
+        # compress output image.
         result_zip.write(filename=save_img_dir + _img, arcname=_img, compress_type=zipfile.ZIP_DEFLATED)
 
-    for quad in quad_boxes:
+    for i, quad in enumerate(quad_boxes):
         if args.dataset in ["ICDAR2015"]:
             [x0, y0], [x1, y1], [x2, y2], [x3, y3] = quad
-            f.write("%d,%d,%d,%d,%d,%d,%d,%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3))
+            f.write("%d,%d,%d,%d,%d,%d,%d,%d\t\t%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3, scores[i]))
 
         else:
             xmin = np.min(quad[:, 0])
@@ -157,6 +164,7 @@ for n, _img in enumerate(val_list):
             f.write("%d,%d,%d,%d\n" % (xmin, ymin, xmax, ymax))
 
     f.close()
+    # compress prediction info of bbox.
     result_zip.write(filename=args.output_zip + "/" + save_file, arcname=save_file, compress_type=zipfile.ZIP_DEFLATED)
     os.remove(args.output_zip + "/res_%s.txt" % (_img[:-4]))
 
@@ -172,7 +180,7 @@ import subprocess
 #os.remove(eval_dir+args.output_zip)
 # delete the txt dir
 subprocess.call("rm -rf " + args.output_zip, shell=True)
-subprocess.call("rm -rf " + save_img_dir, shell=True)
+subprocess.call("rm -rf " + args.save_img_dir, shell=True)
 
 print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" %
       (args.tune_from, args.input_size, args.cls_thresh, args.nms_thresh ))
