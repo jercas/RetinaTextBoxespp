@@ -12,14 +12,14 @@ class RetinaNet(nn.Module):
         self.num_anchors = 7*2  # vertical offset -> *2
         self.num_classes = num_classes
         self.fpn = FPN50()
-        self.loc_head = self._make_head(self.num_anchors*8)
-        self.cls_head = self._make_head(self.num_anchors*self.num_classes)
+        self.loc_head = self._make_head(self.num_anchors*8) # 4 points, 8 coordinates
+        self.cls_head = self._make_head(self.num_anchors*self.num_classes) # n classes
 
     def forward(self, x):
         fms = self.fpn(x)
         loc_preds = []
         cls_preds = []
-        for fm in fms: #for all FPN features
+        for fm in fms: #for all FPN feature maps
             loc_pred = self.loc_head(fm)
             cls_pred = self.cls_head(fm)
             loc_pred = loc_pred.permute(0,2,3,1).contiguous().view(x.size(0),-1,8)                 # [N,H*W*num_anchors, 8]
@@ -30,15 +30,18 @@ class RetinaNet(nn.Module):
 
     def _make_head(self, out_planes):
         layers = []
+        #TODO: FPN / RetinaNet's head shape?
         for _ in range(4):
             layers.append(nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1))
             layers.append(nn.ReLU(True))
+        # textbox layer --> 3*5 conv
         layers.append(nn.Conv2d(256, out_planes, kernel_size=(3, 5), stride=1, padding=(1, 2)))
         return nn.Sequential(*layers)
 
     def freeze_bn(self):
         '''Freeze BatchNorm layers.'''
         for layer in self.modules():
+            # sets the module in evaluation mode
             if isinstance(layer, nn.BatchNorm2d):
                 layer.eval()
 

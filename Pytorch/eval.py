@@ -83,6 +83,7 @@ for n, _img in enumerate(val_list):
     x = Variable(x)
     x = x.cuda()
 
+    # prediction
     loc_preds, cls_preds = net(x)
 
     quad_boxes, labels, scores = encoder.decode(loc_preds.data.squeeze(0), cls_preds.data.squeeze(0), input_scale)
@@ -155,7 +156,6 @@ for n, _img in enumerate(val_list):
     f.close()
     result_zip.write(args.output_zip + "/" + save_file, save_file, compress_type=zipfile.ZIP_DEFLATED)
     os.remove(args.output_zip + "/res_%s.txt" % (_img[:-4]))
-
 
 result_zip.close()
 
