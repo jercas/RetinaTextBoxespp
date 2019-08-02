@@ -29,7 +29,7 @@ parser.add_argument('--dataset', '-d', default='ICDAR2015',
                                                                     type=str, help='evaluation dataset')
 parser.add_argument('--tune_from', '-t', default='./model/ICDAR2015_TextBoxes.pth',
                                                                     type=str, help='pre-trained weight')
-parser.add_argument('--output_zip', '-o', default='_result.zip',
+parser.add_argument('--output_zip', '-o', default='_result',
                                                                     type=str, help='evaluation zip output')
 parser.add_argument('--save_img', '-s', default=1,
                                                                     type=str2bool, help='save output image')
@@ -55,7 +55,7 @@ if not os.path.exists(args.output_zip):
 
 # save results dir & zip
 eval_dir = "icdar2015" if args.dataset in ["ICDAR2015"] else "icdar2013"
-result_zip = zipfile.ZipFile(eval_dir + args.output_zip, 'w')
+result_zip = zipfile.ZipFile(eval_dir + args.output_zip + '.zip', 'w')
 
 _multi_scale = [608, 640, 672, 704, 736, 768, 800, 832, 864, 896, 928, 960, 992, 1024, 1056, 1088, 1120, 1152, 1184, 1216, 1248, 1280]
 multi_scale = np.array(_multi_scale)
@@ -168,7 +168,7 @@ import subprocess
 # delete the zip file
 #os.remove(eval_dir+args.output_zip)
 # delete the txt dir
-#subprocess.call("rm -rf " + args.output_zip, shell=True)
+subprocess.call("rm -rf " + args.output_zip, shell=True)
 
 print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" %
       (args.tune_from, args.input_size, args.cls_thresh, args.nms_thresh ))
