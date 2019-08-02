@@ -13,7 +13,7 @@ from retinanet import RetinaNet
 from encoder import DataEncoder
 from PIL import Image, ImageDraw
 
-#os.environ["CUDA_VISIBLE_DEVICES"] = '6,7'
+os.environ["CUDA_VISIBLE_DEVICES"] = '6,7'
 
 def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1", "Yes", "Y", "True", "T")
@@ -27,7 +27,7 @@ parser.add_argument('--nms_thresh', '-n', default=0.1,
                                                                     type=float, help='NMS threshold')
 parser.add_argument('--dataset', '-d', default='ICDAR2015',
                                                                     type=str, help='evaluation dataset')
-parser.add_argument('--tune_from', '-t', default='./model/ICADR2015_TextBoxes.pth',
+parser.add_argument('--tune_from', '-t', default='./model/ICDAR2015_TextBoxes.pth',
                                                                     type=str, help='pre-trained weight')
 parser.add_argument('--output_zip', '-o', default='_result',
                                                                     type=str, help='evaluation zip output')
@@ -161,7 +161,7 @@ result_zip.close()
 
 import subprocess
 
-query = "python2 %sscript.py -g=%sgt.zip -s=%s" % (eval_dir, eval_dir, eval_dir+args.output_zip)
+query = "python %sscript.py -g=%sgt.zip -s=%s" % (eval_dir, eval_dir, eval_dir+args.output_zip)
 # return value
 subprocess.call(query, shell=True)
 # scorestring = subprocess.check_output(query, shell=True)
