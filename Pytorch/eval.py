@@ -154,20 +154,20 @@ for n, _img in enumerate(val_list):
             f.write("%d,%d,%d,%d\n" % (xmin, ymin, xmax, ymax))
 
     f.close()
-    result_zip.write(args.output_zip + "/" + save_file, save_file, compress_type=zipfile.ZIP_DEFLATED)
+    result_zip.write(args.output_zip + "/" + save_file + '.zip', save_file, compress_type=zipfile.ZIP_DEFLATED)
     os.remove(args.output_zip + "/res_%s.txt" % (_img[:-4]))
 
 result_zip.close()
 
 import subprocess
 
-query = "python %sscript.py -g=%sgt.zip -s=%s" % (eval_dir, eval_dir, eval_dir+args.output_zip)
+#query = "python %sscript.py -g=%sgt.zip -s=%s" % (eval_dir, eval_dir, eval_dir+args.output_zip)
 # return value
-subprocess.call(query, shell=True)
+#subprocess.call(query, shell=True)
 # scorestring = subprocess.check_output(query, shell=True)
-os.remove(eval_dir+args.output_zip)
+# delete the zip file
+#os.remove(eval_dir+args.output_zip)
+# delete the txt dir
+#subprocess.call("rm -rf " + args.output_zip, shell=True)
 
-subprocess.call("rm -rf " + args.output_zip, shell=True)
-
-
-#print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" % (FLAGS.tune_from, FLAGS.input_size, FLAGS.cls_thresh, FLAGS.nms_thresh ))
+print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" % (FLAGS.tune_from, FLAGS.input_size, FLAGS.cls_thresh, FLAGS.nms_thresh ))
