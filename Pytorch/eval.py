@@ -33,6 +33,8 @@ parser.add_argument('--output_zip', '-o', default='_result',
                                                                     type=str, help='evaluation zip output')
 parser.add_argument('--save_img', '-s', default=1,
                                                                     type=str2bool, help='save output image')
+parser.add_argument('--save_img_dir', '-r', default="./icdar2015_test_result/",
+                                                                    type=str, help="path to saved output image")
 args = parser.parse_args()
 
 net = RetinaNet()
@@ -134,12 +136,13 @@ for n, _img in enumerate(val_list):
                 ymax = np.max(quad[:, 1])
                 img = cv2.rectangle(img, (int(xmin), int(ymin)), (int(xmax), int(ymax)), (0,0,255), 2)
 
-        save_img_dir = "./icdar2015_test_result/"
+        save_img_dir = args.save_img_dir
         if not os.path.exists(save_img_dir):
             os.mkdir(save_img_dir)
         img_save_path = os.path.join(save_img_dir,_img)
         #print(img_save_path)
         cv2.imwrite(img_save_path, img)
+        result_zip.write(filename=save_img_dir + _img, arcname=_img, compress_type=zipfile.ZIP_DEFLATED)
 
     for quad in quad_boxes:
         if args.dataset in ["ICDAR2015"]:
@@ -169,6 +172,7 @@ import subprocess
 #os.remove(eval_dir+args.output_zip)
 # delete the txt dir
 subprocess.call("rm -rf " + args.output_zip, shell=True)
+subprocess.call("rm -rf " + save_img_dir, shell=True)
 
 print("\n\n========== result [ %s ] ==== / option [ input_size=%d, cls_thresh=%.2f, nms_thresh=%.2f======\n" %
       (args.tune_from, args.input_size, args.cls_thresh, args.nms_thresh ))
