@@ -1,0 +1,2 @@
+In this folder will be saved the submissions made to the task and the SQlite DB.
+You can delete all files from this folder to clear the task results.
