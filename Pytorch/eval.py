@@ -89,7 +89,6 @@ for n, _img in enumerate(val_list):
     loc_preds, cls_preds = net(x)
 
     quad_boxes, labels, scores = encoder.decode(loc_preds.data.squeeze(0), cls_preds.data.squeeze(0), input_scale)
-    print(scores)
     if quad_boxes.shape[0] is 0:
         continue
 
@@ -155,7 +154,7 @@ for n, _img in enumerate(val_list):
     for i, quad in enumerate(quad_boxes):
         if args.dataset in ["ICDAR2015"]:
             [x0, y0], [x1, y1], [x2, y2], [x3, y3] = quad
-            f.write("%d,%d,%d,%d,%d,%d,%d,%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3))
+            f.write("%d,%d,%d,%d,%d,%d,%d,%d\t\t%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3, scores[iS]))
 
         else:
             xmin = np.min(quad[:, 0])

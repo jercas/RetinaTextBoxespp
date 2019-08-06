@@ -34,7 +34,7 @@ def adjust_learning_rate(cur_lr, optimizer, gamma, step):
         param_group['lr'] = lr
     return lr
 
-parser = argparse.ArgumentParser(description='PyTorch RetinaNet Training')
+parser = argparse.ArgumentParser(description='PyTorch RetinaTextBoxes++ Training')
 parser.add_argument('--lr', default=1e-3,
                                                         type=float, help='learning rate')
 parser.add_argument('--input_size', default=768,
@@ -87,6 +87,7 @@ trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
                                           shuffle=True, num_workers=args.num_workers, collate_fn=trainset.collate_fn)
 
 # set model (focal_loss vs OHEM_CE loss)
+# backbone - se-resnet50
 if args.focal_loss:
     imagenet_pretrain = 'weights/retinanet_se50.pth'
     criterion = FocalLoss()
@@ -121,7 +122,6 @@ if args.resume:
     #cur_lr = checkpoint['lr']
     #step_index = checkpoint['step_index']
     #optimizer.load_state_dict(state["optimizer"])
-
     
 print("multi_scale : ", args.multi_scale)
 print("input_size : ", args.input_size)
@@ -159,11 +159,15 @@ for epoch in range(start_epoch, 10000):
         cls_targets = Variable(cls_targets.cuda())
 
         optimizer.zero_grad()
+        # predict result
         loc_preds, cls_preds = net(inputs)
-
+        # get the loss between prediction and ground truth
         loc_loss, cls_loss = criterion(loc_preds, loc_targets, cls_preds, cls_targets)
+        # total loss
         loss = loc_loss + cls_loss
+        # bp
         loss.backward()
+        # optimizing - stochastic gradient descendent
         optimizer.step()
 
         if iteration % 20 == 0:

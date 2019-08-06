@@ -28,6 +28,7 @@ MANIFEST
 */DB/*
 */*_result/*
 .idea/*
+*/weights/*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
