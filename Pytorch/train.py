@@ -45,7 +45,7 @@ parser.add_argument('--num_workers', default=8,
                                                         type=int, help='Number of workers used in data loading')
 parser.add_argument('--resume', default=None,
                                                         type=str,  help='resume from checkpoint')
-parser.add_argument('--dataset',
+parser.add_argument('--dataset', default='ICDAR2015',
                                                         type=str, help='select training dataset')
 parser.add_argument('--multi_scale', default=False,
                                                         type=str2bool, help='Use multi-scale training')

@@ -1,9 +1,10 @@
-'''Load image/labels/boxes from an annotation file.
+"""
+Load image/labels/boxes from an annotation file.
 
 The list file is like:
 
     img.jpg xmin ymin xmax ymax label xmin ymin xmax ymax label ...
-'''
+"""
 from __future__ import print_function
 
 import os
@@ -14,10 +15,11 @@ import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-import numpy as np
 import cv2
+import numpy as np
 from encoder import DataEncoder
 from transform import resize, random_flip, random_crop, center_crop
+
 
 class ListDataset(data.Dataset):
     def __init__(self, root, dataset, train, transform, input_size, multi_scale=False):
@@ -53,7 +55,8 @@ class ListDataset(data.Dataset):
             self.get_MLT()
         if "ICDAR2013" in dataset:
             self.get_ICDAR2013()
-            
+
+
     def __getitem__(self, idx):
         """Load image.
 
@@ -75,6 +78,7 @@ class ListDataset(data.Dataset):
         labels = self.labels[idx]
 
         return {"image" : img, "boxes" : boxes, "labels" : labels}
+
 
     def collate_fn(self, batch):
         '''bbox encode and make batch
@@ -103,8 +107,10 @@ class ListDataset(data.Dataset):
             cls_targets.append(cls_target)
         return inputs, torch.stack(loc_targets), torch.stack(cls_targets)
 
+
     def __len__(self):
         return self.num_samples
+
 
     def get_SynthText(self):
         import scipy.io as sio
@@ -156,6 +162,7 @@ class ListDataset(data.Dataset):
             self.boxes.append(np.array(_quad, dtype=np.float32))
             self.labels.append(np.array(_classes))
 
+
     def get_ICDAR2015(self):
         data_dir = os.path.join(self.root, 'ICDAR2015')
 
@@ -199,6 +206,7 @@ class ListDataset(data.Dataset):
             self.boxes.append(np.array(_quad, dtype=np.float32))
             self.labels.append(np.array(_classes))
 
+
     def get_MLT(self):
         data_dir = os.path.join(self.root, 'MLT/')
 
@@ -241,7 +249,8 @@ class ListDataset(data.Dataset):
             self.fnames.append(img_file)
             self.boxes.append(np.array(_quad, dtype=np.float32))
             self.labels.append(np.array(_classes))
-            
+
+
     def get_ICDAR2013(self):
         data_dir = os.path.join(self.root, 'ICDAR2013_FOCUSED/')
 
@@ -285,7 +294,17 @@ class ListDataset(data.Dataset):
             self.fnames.append(img_file)
             self.boxes.append(np.array(_quad, dtype=np.float32))
             self.labels.append(np.array(_classes))
-            
+
+
+    def get_PLATE(self):
+        """
+
+        :return:
+        """
+
+        return 0
+
+
 def test():
     import torchvision
 
