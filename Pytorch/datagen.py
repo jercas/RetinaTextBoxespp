@@ -202,7 +202,7 @@ class ListDataset(data.Dataset):
 
 				_quad.append([_x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3])
 				_classes.append(1)
-
+			print('quad: ', _quad, 'classes: ', _classes)
 			if len(_quad) is 0:
 				self.num_samples -= 1
 				continue
@@ -358,7 +358,7 @@ def test():
 	from augmentations import Augmentation_traininig
 
 	dataset = ListDataset(root='./DB/',
-						  dataset='PLATE', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
+						  dataset='ICDAR2015', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
 
 	dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=1, collate_fn=dataset.collate_fn)
 	count=0
