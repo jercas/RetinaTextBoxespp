@@ -354,10 +354,10 @@ class ListDataset(data.Dataset):
 			self.fnames.append(img_file)
 			self.boxes.append(np.array(_quad, dtype=np.float32))
 			self.labels.append(np.array(_classes))
-		    h = pd.DataFrame(h)
-		    w = pd.DataFrame(w)
-		    h.to_csv('h_{0}.csv'.format(mode))
-		    w.to_csv('w_{0}.csv'.format(mode))
+		h = pd.DataFrame(h)
+		w = pd.DataFrame(w)
+		h.to_csv('h_{0}.csv'.format(mode))
+		w.to_csv('w_{0}.csv'.format(mode))
 
 
 def test():
