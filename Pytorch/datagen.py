@@ -202,7 +202,7 @@ class ListDataset(data.Dataset):
 
 				_quad.append([_x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3])
 				_classes.append(1)
-			print('quad: ', _quad, 'classes: ', _classes)
+			#print('quad: ', _quad, 'classes: ', _classes)
 			if len(_quad) is 0:
 				self.num_samples -= 1
 				continue
@@ -340,7 +340,7 @@ class ListDataset(data.Dataset):
 				_quad.append([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3])
 				_classes.append(1)
 
-			print('quad: ', _quad, 'classes: ', _classes)
+			#print('quad: ', _quad, 'classes: ', _classes)
 
 			if len(_quad) is 0:
 				self.num_samples -= 1
