@@ -36,7 +36,7 @@ def adjust_learning_rate(cur_lr, optimizer, gamma, step):
 
 
 # usage:
-# CUDA_VISIBLE_DEVICES=6,7 python train.py --root=/data/huzechen/plateRecognition/PlateTmp/13province/motor/ --dataset=PLATE --batch_size=16 --multi_scale=True --logdir=logs/multi_step1/ --save_folder=models/multi_step1/ --num_workers=6
+# CUDA_VISIBLE_DEVICES=6,7 python train.py --root=./DB/ --dataset=PLATE --batch_size=16 --multi_scale=True --logdir=logs/multi_step1/ --save_folder=models/multi_step1/ --num_workers=6
 parser = argparse.ArgumentParser(description='PyTorch RetinaTextBoxes++ Training')
 parser.add_argument('--root', default='./DB/',
                                                         type=str, help='root of the dataset dir')

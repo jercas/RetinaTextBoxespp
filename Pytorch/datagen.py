@@ -310,6 +310,8 @@ class ListDataset(data.Dataset):
 		dataset = pd.read_csv(data_dir+'datasetPath_{0}.csv'.format(mode))
 		dataset = np.array(dataset)
 		dataset_size = len(dataset)
+		h = np.zeros(dataset_size)
+		w = np.zeros(dataset_size)
 
 		self.num_samples = dataset_size
 		print(mode, "ing on PLATE : ", dataset_size)
@@ -321,6 +323,8 @@ class ListDataset(data.Dataset):
 			label2 = val[8:16]
 			img = cv2.imread(img_file)
 			img_h, img_w, img_c = img.shape
+			h[ind] = img_h
+			w[ind] = img_w
 
 			_quad = []
 			_classes = []
@@ -350,6 +354,10 @@ class ListDataset(data.Dataset):
 			self.fnames.append(img_file)
 			self.boxes.append(np.array(_quad, dtype=np.float32))
 			self.labels.append(np.array(_classes))
+			h = pd.DataFrame(h)
+			w = pd.DataFrame(w)
+			h.to_csv('h_{0}.csv'.format(mode))
+			w.to_csv('w_{0}.csv'.format(mode))
 
 
 def test():
@@ -418,5 +426,5 @@ def test2():
 		print('Test2 End.')
 
 
-#test()
+test()
 #test2()
