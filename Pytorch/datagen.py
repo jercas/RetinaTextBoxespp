@@ -332,13 +332,14 @@ class ListDataset(data.Dataset):
 					_x0 = int(_x0[1:])
 
 				_y0, _x1, _y1, _x2, _y2, _x3, _y3 = [int(p) for p in [_y0, _x1, _y1, _x2, _y2, _x3, _y3]]
-
+				print(_y0, _x1, _y1, _x2, _y2, _x3, _y3)
 				_quad.append([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3])
 				_classes.append(1)
 
 			if len(_quad) is 0:
 				self.num_samples -= 1
 				continue
+
 			self.fnames.append(img_file)
 			self.boxes.append(np.array(_quad, dtype=np.float32))
 			self.labels.append(np.array(_classes))
@@ -374,7 +375,7 @@ def test():
 
 		for box in boxes:
 			draw.polygon(np.expand_dims(box,0), outline=(0,255,0))
-		img.save('/home/beom/samba/%d.jpg' % n)
+		img.save('/data/huzechen/RetinaTextBoxespp/Pytorch/DB/PLATE/testDataload/%d.jpg' % n)
 
 		if n==19:
 			break
