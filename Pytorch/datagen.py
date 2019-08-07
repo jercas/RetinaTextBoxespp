@@ -361,7 +361,7 @@ def test():
 	dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=1, collate_fn=dataset.collate_fn)
 	count=0
 	for n, (img, boxes, labels) in enumerate(dataloader):
-		print(img.size(), boxes.size(), labels)
+            print('img:', img.size(), 'boxes', boxes.size(), labels)
 		img = img.data.numpy()
 		print('img_shape: ', img.shape, '\n', img)
 		img = img.transpose((1, 2, 0)) * 255
