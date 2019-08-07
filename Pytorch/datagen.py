@@ -315,6 +315,7 @@ class ListDataset(data.Dataset):
 		print(mode, "ing on PLATE : ", dataset_size)
 
 		for ind, val in enumerate(dataset):
+			print("processed : %d / %d" % (ind, len(dataset_size)), end='\r')
 			img_file = val[16]
 			label1 = val[0:8]
 			label2 = val[8:16]
