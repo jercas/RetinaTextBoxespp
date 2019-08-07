@@ -310,8 +310,6 @@ class ListDataset(data.Dataset):
 		dataset = pd.read_csv(data_dir+'datasetPath_{0}.csv'.format(mode))
 		dataset = np.array(dataset)
 		dataset_size = len(dataset)
-		h = np.zeros(dataset_size)
-		w = np.zeros(dataset_size)
 
 		self.num_samples = dataset_size
 		print(mode, "ing on PLATE : ", dataset_size)
@@ -321,10 +319,7 @@ class ListDataset(data.Dataset):
 			img_file = val[16]
 			label1 = val[0:8]
 			label2 = val[8:16]
-			img = cv2.imread(img_file)
-			img_h, img_w, img_c = img.shape
-			h[ind] = img_h
-			w[ind] = img_w
+			img_h, img_w = val[17], val[18]
 
 			_quad = []
 			_classes = []
@@ -354,10 +349,6 @@ class ListDataset(data.Dataset):
 			self.fnames.append(img_file)
 			self.boxes.append(np.array(_quad, dtype=np.float32))
 			self.labels.append(np.array(_classes))
-		h = pd.DataFrame(h)
-		w = pd.DataFrame(w)
-		h.to_csv('h_{0}.csv'.format(mode), index=None)
-		w.to_csv('w_{0}.csv'.format(mode), index=None)
 
 
 def test():
@@ -366,7 +357,7 @@ def test():
 	from augmentations import Augmentation_traininig
 
 	dataset = ListDataset(root='./DB/',
-						  dataset='PLATE', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
+						  dataset='PLATE', train=True, transform=Augmentation_traininig, input_size=600, multi_scale=True)
 
 	dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=1, collate_fn=dataset.collate_fn)
 	count=0
