@@ -169,7 +169,7 @@ class ListDataset(data.Dataset):
 
 	def get_ICDAR2015(self):
 		data_dir = os.path.join(self.root, 'ICDAR2015/')
-                mode = 'train' if self.train else 'test'
+		mode = 'train' if self.train else 'test'
 
 		dataset_list = os.listdir(data_dir + mode)
 		dataset_list = [l[:-4] for l in dataset_list if "jpg" in l]
