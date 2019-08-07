@@ -356,7 +356,7 @@ def test():
 	from augmentations import Augmentation_traininig
 
 	dataset = ListDataset(root='./DB/',
-						  dataset='PLATE', train=True, transform=Augmentation_traininig, input_size=600, multi_scale=True)
+						  dataset='PLATE', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
 
 	dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=1, collate_fn=dataset.collate_fn)
 	count=0
@@ -376,22 +376,19 @@ def test():
 
 		for box in boxes:
 			draw.polygon(np.expand_dims(box,0), outline=(0,255,0))
-		img.save('/data/huzechen/RetinaTextBoxespp/Pytorch/DB/PLATE/testDataload/%d.jpg' % n)
+		img.save('/data/huzechen/RetinaTextBoxespp/Pytorch/DB/PLATE/%d.jpg' % n)
 
 		if n==19:
 			break
+	print('Test End.')
 
 def test2():
 	import torchvision
 
 	from augmentations import Augmentation_traininig
 
-	dataset = ListDataset(root='/root/DB/',
-						  dataset='ICDAR2015', train=True, transform=Augmentation_traininig, input_size=600, multi_scale=True)
-
-	import cv2
-	import numpy as np
-	from PIL import Image, ImageDraw
+	dataset = ListDataset(root='./DB/',
+						  dataset='PLATE', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
 
 	for i in range(10):
 		data = dataset.__getitem__(i)
@@ -416,7 +413,9 @@ def test2():
 		#cv2.imwrite('/home/beom/samba/%d.jpg' % i, img)
 
 		img = Image.fromarray(img)
-		img.save('/home/beom/samba/%d.jpg' % i)
+		img.save('/data/huzechen/RetinaTextBoxespp/Pytorch/DB/PLATE/%d.jpg' % i)
+		print('Test2 End.')
 
 
 test()
+test2()
