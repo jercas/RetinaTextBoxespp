@@ -307,6 +307,7 @@ class ListDataset(data.Dataset):
         import pandas as pd
         mode = 'train' if self.train else 'test'
         dataset = pd.read_csv(data_dir+'datasetPath_{0}.csv'.format(mode))
+        dataset = np.array(dataset)
         dataset_size = len(dataset)
 
         self.num_samples = dataset_size
@@ -414,4 +415,4 @@ def test2():
         img.save('/home/beom/samba/%d.jpg' % i)
     
     
-#test()
+test()
