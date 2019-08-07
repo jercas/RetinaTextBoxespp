@@ -307,7 +307,7 @@ class ListDataset(data.Dataset):
 		"""
 		data_dir = os.path.join(self.root, 'PLATE/')
 		mode = 'train' if self.train else 'test'
-		dataset = pd.read_csv(data_dir+'datasetPath_{0}.csv'.format(mode))
+		dataset = pd.read_csv(data_dir+'dataset_{0}.csv'.format(mode))
 		dataset = np.array(dataset)
 		dataset_size = len(dataset)
 
