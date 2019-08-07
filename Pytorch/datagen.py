@@ -364,7 +364,7 @@ def test():
 		print(img.size(), boxes.size())
 		img = img.data.numpy()
 		print(img)
-                img = img.transpose((1, 2, 0)) * 255
+		img = img.transpose((1, 2, 0)) * 255
 		img = np.array(img, dtype=np.uint8)
 
 		img = Image.fromarray(img)
