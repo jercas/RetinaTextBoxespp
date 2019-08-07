@@ -315,7 +315,7 @@ class ListDataset(data.Dataset):
 		print(mode, "ing on PLATE : ", dataset_size)
 
 		for ind, val in enumerate(dataset):
-			print("processed : %d / %d" % (ind, len(dataset_size)), end='\r')
+			print("processed : %d / %d" % (ind, dataset_size), end='\r')
 			img_file = val[16]
 			label1 = val[0:8]
 			label2 = val[8:16]
@@ -337,7 +337,7 @@ class ListDataset(data.Dataset):
 					_x0 = int(_x0[1:])
 
 				_y0, _x1, _y1, _x2, _y2, _x3, _y3 = [int(p) for p in [_y0, _x1, _y1, _x2, _y2, _x3, _y3]]
-				print(_y0, _x1, _y1, _x2, _y2, _x3, _y3)
+				#print(_y0, _x1, _y1, _x2, _y2, _x3, _y3)
 				_quad.append([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3])
 				_classes.append(1)
 
