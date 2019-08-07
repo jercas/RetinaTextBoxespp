@@ -318,8 +318,8 @@ class ListDataset(data.Dataset):
 			img_file = val[16]
 			label1 = val[0:8]
 			label2 = val[8:16]
-			img = Image.open(img_file)
-			img_x, img_y = img.size
+			img = cv2.imread(img_file)
+			img_h, img_w, img_c = img.shape
 
 			_quad = []
 			_classes = []
@@ -327,8 +327,8 @@ class ListDataset(data.Dataset):
 			for i in range(2):
 				label = label1 if i == 0 else label2
 				_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3 = \
-					label[0]*img_x, label[1]*img_y, label[2]*img_x, label[3]*img_y, \
-					label[4]*img_x, label[5]*img_y, label[6]*img_x, label[7]*img_y
+					label[0]*img_w, label[1]*img_h, label[2]*img_w, label[3]*img_h, \
+					label[4]*img_w, label[5]*img_h, label[6]*img_w, label[7]*img_h
 
 				try:
 					_x0 = int(_x0)
