@@ -55,6 +55,8 @@ class ListDataset(data.Dataset):
             self.get_MLT()
         if "ICDAR2013" in dataset:
             self.get_ICDAR2013()
+        if "PLATE" in dataset:
+            self.get_PLATE()
 
 
     def __getitem__(self, idx):
@@ -301,8 +303,42 @@ class ListDataset(data.Dataset):
 
         :return:
         """
+        data_dir = os.path.join(self.root, 'PLATE/')
+        import pandas as pd
+        mode = 'train' if self.train else 'test'
+        dataset = pd.read_csv(data_dir+'datasetPath_{0}.csv'.format(mode))
+        dataset_size = len(dataset)
 
-        return 0
+        self.num_samples = dataset_size
+        print(mode, "ing on PLATE : ", dataset_size)
+
+        for ind, val in enumerate(dataset):
+            img_file = val[16]
+            label1 = val[0:8]
+            label2 = val[8:16]
+
+            _quad = []
+            _classes = []
+
+            for i in range(2):
+                _x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3 = label1.split(",") if i==0 else label2.split(",")
+
+                try:
+                    _x0 = int(_x0)
+                except:
+                    _x0 = int(_x0[1:])
+
+                _y0, _x1, _y1, _x2, _y2, _x3, _y3 = [int(p) for p in [_y0, _x1, _y1, _x2, _y2, _x3, _y3]]
+
+                _quad.append([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3])
+                _classes.append(1)
+
+            if len(_quad) is 0:
+                self.num_samples -= 1
+                continue
+            self.fnames.append(img_file)
+            self.boxes.append(np.array(_quad, dtype=np.float32))
+            self.labels.append(np.array(_classes))
 
 
 def test():
@@ -311,7 +347,7 @@ def test():
     from augmentations import Augmentation_traininig
     
     dataset = ListDataset(root='./DB/',
-                          dataset='ICDAR2015', train=True, transform=Augmentation_traininig, input_size=600, multi_scale=True)
+                          dataset='PLATE', train=True, transform=Augmentation_traininig, input_size=600, multi_scale=True)
 
     import cv2
     import numpy as np
