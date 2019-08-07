@@ -27,7 +27,7 @@ parser.add_argument('--nms_thresh', '-n', default=0.1,
                                                                     type=float, help='NMS threshold')
 parser.add_argument('--dataset', '-d', default='ICDAR2015',
                                                                     type=str, help='evaluation dataset')
-parser.add_argument('--tune_from', '-t', default='./model/ICDAR2015_TextBoxes.pth',
+parser.add_argument('--tune_from', '-t', default='./models/ICDAR2015_TextBoxes.pth',
                                                                     type=str, help='pre-trained weight')
 parser.add_argument('--output_zip', '-o', default='_result',
                                                                     type=str, help='evaluation zip output')
