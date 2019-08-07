@@ -358,7 +358,7 @@ def test():
 	from augmentations import Augmentation_traininig
 
 	dataset = ListDataset(root='./DB/',
-						  dataset='ICDAR2015', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
+						  dataset='PLATE', train=False, transform=Augmentation_traininig, input_size=600, multi_scale=True)
 
 	dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=1, collate_fn=dataset.collate_fn)
 	count=0
@@ -418,5 +418,5 @@ def test2():
 		print('Test2 End.')
 
 
-test()
-test2()
+#test()
+#test2()
