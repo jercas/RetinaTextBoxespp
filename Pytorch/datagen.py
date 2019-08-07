@@ -168,20 +168,20 @@ class ListDataset(data.Dataset):
 
 
 	def get_ICDAR2015(self):
-		data_dir = os.path.join(self.root, 'ICDAR2015')
+		data_dir = os.path.join(self.root, 'ICDAR2015/')
+                mode = 'train' if self.train else 'test'
 
-		dataset_list = os.listdir(data_dir + "train")
+		dataset_list = os.listdir(data_dir + mode)
 		dataset_list = [l[:-4] for l in dataset_list if "jpg" in l]
 
 		dataset_size = len(dataset_list)
-		mode = 'train' if self.train else 'test'
 
 		self.num_samples = dataset_size
 		print(mode, "ing on ICDAR2015 : ", dataset_size)
 
 		for i in dataset_list:
 			img_file = data_dir + "%s/%s.jpg" % (mode, i)
-			label_file = open(data_dir + "%s/gt_%s.txt" % (mode, i))
+			label_file = open(data_dir + "%s/gt/gt_%s.txt" % (mode, i))
 			label_file = label_file.readlines()
 
 			_quad = []
