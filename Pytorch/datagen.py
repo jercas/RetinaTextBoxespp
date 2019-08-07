@@ -363,7 +363,7 @@ def test():
 	for n, (img, boxes, labels) in enumerate(dataloader):
 		print(img.size(), boxes.size(), labels)
 		img = img.data.numpy()
-                print('img_shape: 'img.shape, '\n', img)
+		print('img_shape: ', img.shape, '\n', img)
 		img = img.transpose((1, 2, 0)) * 255
 		img = np.array(img, dtype=np.uint8)
 
