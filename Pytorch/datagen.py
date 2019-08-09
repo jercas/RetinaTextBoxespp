@@ -77,7 +77,7 @@ class ListDataset(data.Dataset):
 
 		img = cv2.imread(os.path.join(self.root, fname))
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                print(img)
+		print(img)
 
 		boxes = self.boxes[idx].copy()
 		labels = self.labels[idx]
