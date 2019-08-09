@@ -23,7 +23,7 @@ from encoder import DataEncoder
 
 from torch.autograd import Variable
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '6,7'
+os.environ["CUDA_VISIBLE_DEVICES"] = '2,3,5,6'
 
 def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1")
@@ -90,7 +90,7 @@ trainset = ListDataset(root=args.root, dataset=args.dataset, train=True,
                        transform=Augmentation_traininig, input_size=args.input_size, multi_scale=args.multi_scale)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, 
                                           shuffle=True, num_workers=args.num_workers, collate_fn=trainset.collate_fn)
-
+print('train loader over\n')
 # set model (focal_loss vs OHEM_CE loss)
 # backbone - se-resnet50
 if args.focal_loss:
@@ -102,7 +102,7 @@ else:
     criterion = OHEM_loss()
     num_classes = 2
 
-    
+print('loss initialtion\n')    
 # Training Detail option\
 stepvalues = (10000, 20000, 30000, 40000, 50000) if args.dataset in ["SynthText"] else (2000, 4000, 6000, 8000, 10000)
 best_loss = float('inf')  # best test loss
@@ -116,8 +116,8 @@ pEval = None
 
 # Model
 net = RetinaNet(num_classes)
-net.load_state_dict(torch.load(imagenet_pretrain))
-
+#net.load_state_dict(torch.load(imagenet_pretrain))
+print('network establish\n')
 if args.resume:
     print('==> Resuming from checkpoint..', args.resume)
     checkpoint = torch.load(args.resume)
@@ -137,7 +137,7 @@ print("cur_lr : ", cur_lr)
 print("step_index : ", step_index)
 print("num_gpus : ", torch.cuda.device_count())
 
-net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
+net = torch.nn.DataParallel(net, device_ids=list(range(torch.cuda.device_count())))
 net.cuda()
 
 # Training
@@ -150,7 +150,7 @@ optimizer = optim.SGD(net.parameters(), lr=cur_lr, momentum=0.9, weight_decay=1e
 encoder = DataEncoder()
 
 # tensorboard visualize
-writer = SummaryWriter(log_dir=args.logdir)
+writer = SummaryWriter(logdir=args.logdir)
 
 t0 = time.time()
 
@@ -175,7 +175,7 @@ for epoch in range(start_epoch, 10000):
         # optimizing - stochastic gradient descendent
         optimizer.step()
 
-        if iteration % 20 == 0:
+        if iteration % 1 == 0:
             t1 = time.time()
             print('iter ' + repr(iteration) + ' (epoch ' + repr(epoch) + ') || loss: %.4f || l loc_loss: %.4f || l cls_loss: %.4f (Time : %.1f)'\
                  % (loss.sum().item(), loc_loss.sum().item(), cls_loss.sum().item(), (t1 - t0)))
