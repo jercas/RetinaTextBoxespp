@@ -23,8 +23,9 @@ from encoder import DataEncoder
 
 from torch.autograd import Variable
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '2,3,5,6'
-device_ids = [2, 3, 5, 6]
+device_ids = [2,3,5,6]
+os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, device_ids))
+
 
 def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1")
