@@ -139,7 +139,7 @@ print("cur_lr : ", cur_lr)
 print("step_index : ", step_index)
 print("num_gpus : ", torch.cuda.device_count())
 
-net = torch.nn.DataParallel(net, device_ids=device_ids)
+net = torch.nn.DataParallel(net, device_ids=[0,1,2,3])
 net.cuda(device=device_ids[0])
 
 # Training
