@@ -23,7 +23,7 @@ from encoder import DataEncoder
 
 from torch.autograd import Variable
 
-device_ids = [2,3,5,6]
+device_ids = [2,3,5]
 os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, device_ids))
 
 
@@ -137,10 +137,11 @@ print("start_epoch : ", start_epoch)
 print("iteration : ", iteration)
 print("cur_lr : ", cur_lr)
 print("step_index : ", step_index)
+print("gpu available : ", torch.cuda.is_available())
 print("num_gpus : ", torch.cuda.device_count())
 
-net = torch.nn.DataParallel(net, device_ids=[0,1,2,3])
-net.cuda(device=device_ids[0])
+net = torch.nn.DataParallel(net, device_ids=[0,1,2])
+net.cuda()
 
 # Training
 net.train()

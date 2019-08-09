@@ -77,6 +77,7 @@ class ListDataset(data.Dataset):
 
 		img = cv2.imread(os.path.join(self.root, fname))
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                print(img)
 
 		boxes = self.boxes[idx].copy()
 		labels = self.labels[idx]
@@ -340,7 +341,7 @@ class ListDataset(data.Dataset):
 				_quad.append([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3])
 				_classes.append(1)
 
-			#print('quad: ', _quad, 'classes: ', _classes)
+			print('quad: ', _quad, 'classes: ', _classes)
 
 			if len(_quad) is 0:
 				self.num_samples -= 1
@@ -417,5 +418,5 @@ def test2():
 		print('Test2 End.')
 
 
-#test()
+test()
 #test2()
