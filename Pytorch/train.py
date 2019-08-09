@@ -24,6 +24,7 @@ from encoder import DataEncoder
 from torch.autograd import Variable
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '2,3,5,6'
+device_ids = [2, 3, 5, 6]
 
 def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1")
@@ -137,8 +138,8 @@ print("cur_lr : ", cur_lr)
 print("step_index : ", step_index)
 print("num_gpus : ", torch.cuda.device_count())
 
-net = torch.nn.DataParallel(net, device_ids=list(range(torch.cuda.device_count())))
-net.cuda()
+net = torch.nn.DataParallel(net, device_ids=device_ids)
+net.cuda(device=device_ids[0])
 
 # Training
 net.train()
