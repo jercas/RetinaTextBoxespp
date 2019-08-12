@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
+from torch.utils.data import DataLoader, Dataset
 
 from tensorboardX import SummaryWriter
 from augmentations import Augmentation_traininig
@@ -48,7 +49,7 @@ parser.add_argument('--input_size', default=768,
                                                         type=int, help='Input size for training')
 parser.add_argument('--batch_size', default=8,
                                                         type=int, help='Batch size for training')
-parser.add_argument('--num_workers', default=8,
+parser.add_argument('--num_workers', default=0,
                                                         type=int, help='Number of workers used in data loading')
 parser.add_argument('--resume', default=None,
                                                         type=str,  help='resume from checkpoint')
@@ -90,8 +91,8 @@ if not os.path.exists(args.logdir):
 print('==> Preparing data..')
 trainset = ListDataset(root=args.root, dataset=args.dataset, train=True,
                        transform=Augmentation_traininig, input_size=args.input_size, multi_scale=args.multi_scale)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, 
-                                          shuffle=True, num_workers=args.num_workers, collate_fn=trainset.collate_fn)
+trainloader = DataLoader(trainset, batch_size=args.batch_size,
+                                          shuffle=True, collate_fn=trainset.collate_fn, num_workers=0) #args.num_workers
 print('train loader over\n')
 # set model (focal_loss vs OHEM_CE loss)
 # backbone - se-resnet50
@@ -150,7 +151,7 @@ net.module.freeze_bn() # you must freeze batchnorm
 optimizer = optim.SGD(net.parameters(), lr=cur_lr, momentum=0.9, weight_decay=1e-4)
 #optimizer = optim.Adam(net.parameters(), lr=cur_lr)
 
-encoder = DataEncoder()
+encoder = DataEncoder(cls_thresh=0.5, nms_thresh=0.2)
 
 # tensorboard visualize
 writer = SummaryWriter(logdir=args.logdir)

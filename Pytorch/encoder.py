@@ -7,7 +7,7 @@ from utils import meshgrid, box_iou, change_box_order, softmax
 from nms_poly import non_max_suppression_poly
 
 class DataEncoder:
-    def __init__(self, cls_thresh=0.3, nms_thresh=0.1):
+    def __init__(self, cls_thresh=0.5, nms_thresh=0.2):
         self.anchor_areas = [16*16., 32*32., 64*64., 128*128., 256*256, 512*512.]  # v3
         self.aspect_ratios = [1., 2., 3., 5., 1./2., 1./3., 1./5.]                  # v3
 
