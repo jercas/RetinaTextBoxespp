@@ -75,7 +75,8 @@ class ListDataset(data.Dataset):
 		# Load image, boxes and labels.
 		fname = self.fnames[idx]
 
-		img = cv2.imread(os.path.join(self.root, fname))
+		img = cv2.imread(fname)
+
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 		boxes = self.boxes[idx].copy()
@@ -180,9 +181,8 @@ class ListDataset(data.Dataset):
 		print(mode, "ing on ICDAR2015 : ", dataset_size)
 
 		for i in dataset_list:
-			img_file = data_dir + "%s/img_%s.jpg" % (mode, i)
-                        print(img_file)
-			label_file = open(data_dir + "%s/gt/gt_%s.txt" % (mode, i))
+			img_file = data_dir + "%s/%s.jpg" % (mode, i)
+			label_file = open(data_dir + "%s/gt/gt_%s.txt" % (mode, i), 'r', encoding='utf-8')
 			label_file = label_file.readlines()
 
 			_quad = []
@@ -226,7 +226,7 @@ class ListDataset(data.Dataset):
 
 		for i in dataset_list:
 			img_file = data_dir + "%s/%s.jpg" % (mode, i)
-			label_file = open(data_dir + "%s/gt_%s.txt" % (mode, i))
+			label_file = open(data_dir + "%s/gt/gt_%s.txt" % (mode, i), 'r', encoding='utf-8')
 			label_file = label_file.readlines()
 
 			_quad = []
@@ -270,7 +270,7 @@ class ListDataset(data.Dataset):
 
 		for i in dataset_list:
 			img_file = data_dir + "%s/%s.jpg" % (mode, i)
-			label_file = open(data_dir + "%s/gt_%s.txt" % (mode, i))
+			label_file = open(data_dir + "%s/gt/gt_%s.txt" % (mode, i), 'r', encoding='utf-8')
 			label_file = label_file.readlines()
 
 			_quad = []
