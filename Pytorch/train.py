@@ -165,7 +165,7 @@ for epoch in range(start_epoch, 10000):
         inputs = Variable(inputs.cuda())
         loc_targets = Variable(loc_targets.cuda())
         cls_targets = Variable(cls_targets.cuda())
-
+        #print(' inputs: ', inputs, '\n loc_targets: ',loc_targets, '\n cls_targets',cls_targets)
         optimizer.zero_grad()
         # predict result
         loc_preds, cls_preds = net(inputs)
@@ -241,9 +241,9 @@ for epoch in range(start_epoch, 10000):
                     pEval = Popen(eval_cmd, shell=True, stdout=PIPE, stderr=PIPE)
 
                 elif pEval.poll() is not None:
-                    (scorestring, stderrdata) = pEval.communicate()
+                    (scoreString, stdErrData) = pEval.communicate()
 
-                    hmean = float(str(scorestring).strip().split(":")[3].split(",")[0].split("}")[0].strip())
+                    hmean = float(str(scoreString).strip().split(":")[3].split(",")[0].split("}")[0].strip())
 
                     writer.add_scalar('test_hmean', hmean, iteration)
                     
@@ -260,5 +260,3 @@ for epoch in range(start_epoch, 10000):
                 pEval = None
 
         iteration += 1
-
-
