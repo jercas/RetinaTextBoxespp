@@ -11,8 +11,8 @@ class DataEncoder:
         self.anchor_areas = [16*16., 32*32., 64*64., 128*128., 256*256, 512*512.]  # v3
         self.aspect_ratios = [1., 2., 3., 5., 1./2., 1./3., 1./5.]                  # v3
 
-        #self.anchor_areas = [30*30., 70*70., 120*120., 250*250., 320*320. ,450*450.]  #v5
-        #self.aspect_ratios = [1.0, 1.5, 2.0, 3.0, 5.0, 0.5, 0.2]                      #v5
+        #self.anchor_areas = [30*30., 70*70., 120*120., 250*250., 320*320. ,450*450.]  #v6
+        #self.aspect_ratios = [1.0, 1.5, 2.0, 3.0, 5.0, 0.5, 0.2]                      #v6
 
         self.anchor_wh = self._get_anchor_wh()
 
@@ -20,11 +20,11 @@ class DataEncoder:
         self.nms_thresh = nms_thresh
 
     def _get_anchor_wh(self):
-        '''Compute anchor width and height for each feature map.
+        """Compute anchor width and height for each feature map.
 
         Returns:
           anchor_wh: (tensor) anchor wh, sized [#fm, #anchors_per_cell, 2].
-        '''
+        """
         anchor_wh = []
         for s in self.anchor_areas:
             for ar in self.aspect_ratios:  # w/h = ar
@@ -36,7 +36,7 @@ class DataEncoder:
         return torch.FloatTensor(anchor_wh).view(num_fms, -1, 2)
 
     def _get_anchor_boxes(self, input_size):
-        '''Compute anchor boxes for each feature map.
+        """Compute anchor boxes for each feature map.
 
         Args:
           input_size: (tensor) model input size of (w,h).
@@ -44,7 +44,7 @@ class DataEncoder:
         Returns:
           boxes: (list) anchor boxes for each feature map. Each of size [#anchors,4],
                         where #anchors = fmw * fmh * #anchors_per_cell
-        '''
+        """
         num_fms = len(self.anchor_areas)
         fm_sizes = [(input_size/pow(2.,i+2)).ceil() for i in range(num_fms)]  # p2 -> p7 feature map sizes
 
@@ -150,6 +150,7 @@ class DataEncoder:
         if len(score.shape) is 0:
             return quad_boxes, labels, score
         else:
+            print('adad')
             keep = non_max_suppression_poly(quad_boxes, score, self.nms_thresh)
             return quad_boxes[keep], labels[keep], score[keep]
 

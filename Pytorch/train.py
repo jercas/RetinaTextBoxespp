@@ -49,7 +49,7 @@ parser.add_argument('--input_size', default=768,
                                                         type=int, help='Input size for training')
 parser.add_argument('--batch_size', default=8,
                                                         type=int, help='Batch size for training')
-parser.add_argument('--num_workers', default=0,
+parser.add_argument('--num_workers', default=8,
                                                         type=int, help='Number of workers used in data loading')
 parser.add_argument('--resume', default=None,
                                                         type=str,  help='resume from checkpoint')
@@ -92,7 +92,7 @@ print('==> Preparing data..')
 trainset = ListDataset(root=args.root, dataset=args.dataset, train=True,
                        transform=Augmentation_traininig, input_size=args.input_size, multi_scale=args.multi_scale)
 trainloader = DataLoader(trainset, batch_size=args.batch_size,
-                                          shuffle=True, collate_fn=trainset.collate_fn, num_workers=0) #args.num_workers
+                                          shuffle=True, collate_fn=trainset.collate_fn, num_workers=args.num_workers)
 print('train loader over\n')
 # set model (focal_loss vs OHEM_CE loss)
 # backbone - se-resnet50
@@ -119,7 +119,7 @@ pEval = None
 
 # Model
 net = RetinaNet(num_classes)
-#net.load_state_dict(torch.load(imagenet_pretrain))
+net.load_state_dict(torch.load(imagenet_pretrain))
 print('network establish\n')
 if args.resume:
     print('==> Resuming from checkpoint..', args.resume)
@@ -197,9 +197,11 @@ for epoch in range(start_epoch, 10000):
             infer_img = infer_img.astype(np.uint8)
             h, w, _ = infer_img.shape
 
+            print('before nms')
             boxes, labels, scores = encoder.decode(loc_preds[0], cls_preds[0], (w,h))
             boxes = boxes.reshape(-1, 4, 2).astype(np.int32)
-            
+            print('after nms')
+
             if boxes.shape[0] is not 0:
                 infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 4)
 

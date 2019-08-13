@@ -75,13 +75,12 @@ class ListDataset(data.Dataset):
 		# Load image, boxes and labels.
 		fname = self.fnames[idx]
 		img = cv2.imread(fname)
-		print(1)
 		#img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 		img = img[:,:,::-1]
-		print(2)
+
 		boxes = self.boxes[idx].copy()
 		labels = self.labels[idx]
-		print(3)
+
 		return {"image" : img, "boxes" : boxes, "labels" : labels}
 
 

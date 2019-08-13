@@ -48,11 +48,14 @@ def non_max_suppression_poly(boxes, scores, iou_thresh):
     box_num = len(boxes)
     nms_flag = [True]*box_num
 
+    print('Get {0} boxes.'.format(box_num))
     for i in range(box_num):
+        print("processed i: %d / %d\n" % (i, box_num), end='\r')
         ii = indices[i]
         if not nms_flag[ii]:
             continue
         for j in range(box_num):
+            print("processed j: %d / %d" % (j, box_num), end='\r')
             jj = indices[j]
             if j == i:
                 continue

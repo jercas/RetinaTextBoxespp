@@ -250,8 +250,10 @@ class FPN(nn.Module):
 
         return p2, p3, p4, p5, p6, p7
 
+
 def FPN50():
     return FPN(Bottleneck, [3,4,6,3])
+
 
 def FPN101():
     return FPN(Bottleneck, [2,4,23,3])
@@ -264,4 +266,3 @@ def test():
         print(fm.size())
 
 #test()
-
