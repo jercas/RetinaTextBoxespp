@@ -24,7 +24,7 @@ from encoder import DataEncoder
 
 from torch.autograd import Variable
 
-device_ids = [2,3,4,6]
+device_ids = [3,4,5,6]
 os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, device_ids))
 
 
@@ -67,7 +67,7 @@ parser.add_argument('--gamma', default=0.5,
                                                         type=float, help='Gamma update for SGD')
 parser.add_argument('--save_interval', default=500,
                                                         type=int, help='Frequency for saving checkpoint models')
-parser.add_argument('--save_folder', default='model/',
+parser.add_argument('--save_folder', default='models/',
                                                         type=str, help='Location to save checkpoint models')
 parser.add_argument('--evaluation', default=False,
                                                         type=str2bool, help='Evaulation during training')
