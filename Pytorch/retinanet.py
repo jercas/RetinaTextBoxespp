@@ -6,7 +6,6 @@ from torch.autograd import Variable
 
 
 class RetinaNet(nn.Module):
-
     def __init__(self, num_classes=1):
         super(RetinaNet, self).__init__()
         self.num_anchors = 7*2  # vertical offset -> *2
@@ -61,13 +60,15 @@ class RetinaNet(nn.Module):
 
 
 def test():
-    net = RetinaNet()
-    loc_preds, cls_preds = net(Variable(torch.randn(2,3,224,224)))
-    print(loc_preds.size())
-    print(cls_preds.size())
-    loc_grads = Variable(torch.randn(loc_preds.size()))
-    cls_grads = Variable(torch.randn(cls_preds.size()))
-    loc_preds.backward(loc_grads)
+    net = RetinaNet().cuda()
+    loc_preds, cls_preds = net(Variable(torch.randn(2,3,224,224)).cuda()) # 2 imgs - [3, 224, 224]
+    print(loc_preds.size()) # [2, 58590, 8]
+    print(cls_preds.size()) # [2, 58590, 1]
+    loc_grads = Variable(torch.randn(loc_preds.size())).cuda()
+    cls_grads = Variable(torch.randn(cls_preds.size())).cuda()
+    loc_preds.backward(loc_grads, retain_graph=True)
     cls_preds.backward(cls_grads)
 
-# test()
+
+if __name__ == "__main__":
+    test()

@@ -97,7 +97,7 @@ print('train loader over\n')
 # set model (focal_loss vs OHEM_CE loss)
 # backbone - se-resnet50
 if args.focal_loss:
-    imagenet_pretrain = 'weights/se_resnet50.pth'#'weights/retinanet_se50.pth'
+    imagenet_pretrain = 'weights/retinanet_se50.pth'
     criterion = FocalLoss()
     num_classes = 1
 else:
@@ -197,15 +197,13 @@ for epoch in range(start_epoch, 10000):
             infer_img = infer_img.astype(np.uint8)
             h, w, _ = infer_img.shape
 
-            print('before nms')
             boxes, labels, scores = encoder.decode(loc_preds[0], cls_preds[0], (w,h))
             boxes = boxes.reshape(-1, 4, 2).astype(np.int32)
-            print('after nms')
 
             if boxes.shape[0] is not 0:
                 infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 4)
 
-            writer.add_image('image', infer_img, iteration)
+            writer.add_image('image', img_tensor=infer_img, global_step=iteration, dataformats='HWC')
             writer.add_scalar('input_size', h, iteration)
             writer.add_scalar('learning_rate', cur_lr, iteration)
 

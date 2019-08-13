@@ -1,4 +1,4 @@
-'''Perform transforms on both PIL image and object boxes.'''
+"""Perform transforms on both PIL image and object boxes."""
 import math
 import random
 

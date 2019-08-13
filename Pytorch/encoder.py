@@ -150,7 +150,6 @@ class DataEncoder:
         if len(score.shape) is 0:
             return quad_boxes, labels, score
         else:
-            print('adad')
             keep = non_max_suppression_poly(quad_boxes, score, self.nms_thresh)
             return quad_boxes[keep], labels[keep], score[keep]
 

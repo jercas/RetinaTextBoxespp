@@ -1,8 +1,8 @@
-'''Init RestinaNet50 with pretrained ResNet50 model.
+"""Init RestinaNet50 with pretrained ResNet50 model.
 
 Download pretrained ResNet50 params from:
   https://download.pytorch.org/models/resnet50-19c8e357.pth
-'''
+"""
 import math
 import torch
 import torch.nn as nn
@@ -11,9 +11,9 @@ import torch.nn.init as init
 from fpn import FPN50
 from retinanet import RetinaNet
 
-
-print('Loading pretrained ResNet50 model..')
-d = torch.load('./weights/se_resnet50-ce0d4300.pth')
+pretrained_path = './weights/se_resnet50.pth'
+print('Loading pretrained {0} model..'.format(pretrained_path))
+d = torch.load(pretrained_path)
 
 print('Loading into FPN50..')
 fpn = FPN50()
@@ -27,7 +27,7 @@ for k in d.keys():
     dd[k] = d[k]
 
 print('Saving RetinaNet..')
-net = RetinaNet(2)
+net = RetinaNet(1)
 
 for m in net.modules():
     if isinstance(m, nn.Conv2d):
@@ -42,5 +42,5 @@ pi = 0.01
 init.constant_(net.cls_head[-1].bias, -math.log((1-pi)/pi))
 
 net.fpn.load_state_dict(dd)
-torch.save(net.state_dict(), 'weights/retinanet_se50_OHEM.pth')
+torch.save(net.state_dict(), 'weights/retinanet_se50.pth')
 print('Done!')
