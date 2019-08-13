@@ -112,7 +112,7 @@ class DataEncoder:
         return loc_targets, cls_targets
 
     def decode(self, loc_preds, cls_preds, input_size):
-        '''Decode outputs back to bouding box locations and class labels.
+        """Decode outputs back to bounding box locations and class labels.
 
         Args:
           loc_preds: (tensor) predicted locations, sized [#anchors, 8].
@@ -122,7 +122,7 @@ class DataEncoder:
         Returns:
           boxes: (tensor) decode box locations, sized [#obj,8].
           labels: (tensor) class labels for each box, sized [#obj,].
-        '''
+        """
 
         input_size = torch.Tensor([input_size,input_size]) if isinstance(input_size, int) \
                      else torch.Tensor(input_size)

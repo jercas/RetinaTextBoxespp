@@ -24,19 +24,20 @@ from encoder import DataEncoder
 
 from torch.autograd import Variable
 
+# Indicate visible gpu device
 device_ids = [3,4,5,6]
 os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, device_ids))
 
-
+# Multi-semantic transform
 def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1")
 
+# Dynamic adjust lr
 def adjust_learning_rate(cur_lr, optimizer, gamma, step):
     lr = cur_lr * (gamma ** (step))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
     return lr
-
 
 # usage:
 # CUDA_VISIBLE_DEVICES=6,7 python train.py --root=./DB/ --dataset=PLATE --batch_size=16 --multi_scale=True --logdir=logs/multi_step1/ --save_folder=models/multi_step1/ --num_workers=6
@@ -59,7 +60,7 @@ parser.add_argument('--multi_scale', default=False,
                                                         type=str2bool, help='Use multi-scale training')
 parser.add_argument('--focal_loss', default=True,
                                                         type=str2bool, help='Use Focal loss or OHEM loss')
-parser.add_argument('--logdir', default='logs/',
+parser.add_argument('--logdir', default='./logs/',
                                                         type=str, help='Tensorboard log dir')
 parser.add_argument('--max_iter', default=1200000,
                                                         type=int, help='Number of training iterations')
@@ -67,35 +68,42 @@ parser.add_argument('--gamma', default=0.5,
                                                         type=float, help='Gamma update for SGD')
 parser.add_argument('--save_interval', default=500,
                                                         type=int, help='Frequency for saving checkpoint models')
-parser.add_argument('--save_folder', default='models/',
+parser.add_argument('--save_folder', default='./models/',
                                                         type=str, help='Location to save checkpoint models')
-parser.add_argument('--evaluation', default=False,
+parser.add_argument('--evaluation', default=True,
                                                         type=str2bool, help='Evaulation during training')
 parser.add_argument('--eval_step', default=1000,
                                                         type=int, help='Evauation step')
 parser.add_argument('--eval_device', default=2,
                                                         type=int, help='GPU device for evaluation')
+parser.add_argument('--cls_thresh', default=0.5,
+                                                        type=int, help='classification thresh')
+parser.add_argument('--nms_thresh', default=0.2,
+                                                        type=int, help='nms thresh')
 args = parser.parse_args()
 
+# confirm GPU & Focal loss use
 assert torch.cuda.is_available(), 'Error: CUDA not found!'
 assert args.focal_loss, "OHEM + ce_loss is not working... :("
 
-# create folder for saving model and log if there are not exist.
+# confirm existence of the folder for saving model and log if there are not exist, if not create them.
 if not os.path.exists(args.save_folder):
     os.mkdir(args.save_folder)
 
 if not os.path.exists(args.logdir):
     os.mkdir(args.logdir)
 
-# Data
+# Data load
 print('==> Preparing data..')
 trainset = ListDataset(root=args.root, dataset=args.dataset, train=True,
                        transform=Augmentation_traininig, input_size=args.input_size, multi_scale=args.multi_scale)
+
 trainloader = DataLoader(trainset, batch_size=args.batch_size,
                                           shuffle=True, collate_fn=trainset.collate_fn, num_workers=args.num_workers)
-print('train loader over\n')
-# set model (focal_loss vs OHEM_CE loss)
-# backbone - se-resnet50
+
+# Set model (focal_loss vs OHEM_CE loss)
+# Backbone - se-resnet50
+print('==>loss initializing...\n')
 if args.focal_loss:
     imagenet_pretrain = 'weights/retinanet_se50.pth'
     criterion = FocalLoss()
@@ -105,8 +113,7 @@ else:
     criterion = OHEM_loss()
     num_classes = 2
 
-print('loss initialtion\n')    
-# Training Detail option\
+# Training Detail option
 stepvalues = (10000, 20000, 30000, 40000, 50000) if args.dataset in ["SynthText"] else (2000, 4000, 6000, 8000, 10000)
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
@@ -118,19 +125,24 @@ step_index = 0
 pEval = None
 
 # Model
+print('==>network establishing...\n')
 net = RetinaNet(num_classes)
 net.load_state_dict(torch.load(imagenet_pretrain))
-print('network establish\n')
+
+# Resume training if there are any break off
 if args.resume:
     print('==> Resuming from checkpoint..', args.resume)
     checkpoint = torch.load(args.resume)
     net.load_state_dict(checkpoint['net'])
-    #start_epoch = checkpoint['epoch']
-    #iteration = checkpoint['iteration']
-    #cur_lr = checkpoint['lr']
-    #step_index = checkpoint['step_index']
+    start_epoch = checkpoint['epoch']
+    iteration = checkpoint['iteration']
+    cur_lr = checkpoint['lr']
+    step_index = checkpoint['step_index']
+    print(" net: {0}\n start_epoch: {1}\n iteration: {2}\n current_lr: {3}\n step_index: {4}\n".format(
+        start_epoch, iteration, cur_lr,step_index))
     #optimizer.load_state_dict(state["optimizer"])
-    
+
+print('==>training detail...\n')
 print("multi_scale : ", args.multi_scale)
 print("input_size : ", args.input_size)
 print("stepvalues : ", stepvalues)
@@ -141,32 +153,32 @@ print("step_index : ", step_index)
 print("gpu available : ", torch.cuda.is_available())
 print("num_gpus : ", torch.cuda.device_count())
 
+# Set data parallel training
 net = torch.nn.DataParallel(net, device_ids=[0,1,2,3])
 net.cuda()
 
 # Training
+print("==>training start...")
 net.train()
-net.module.freeze_bn() # you must freeze batchnorm
-
-optimizer = optim.SGD(net.parameters(), lr=cur_lr, momentum=0.9, weight_decay=1e-4)
-#optimizer = optim.Adam(net.parameters(), lr=cur_lr)
-
+# Freeze BN layer for pre-trained backbone
+net.module.freeze_bn()
+# Set optimizer -- SGD or Adam
+optimizer = optim.SGD(net.parameters(), lr=cur_lr, momentum=0.9, weight_decay=1e-4) #optim.Adam(net.parameters(), lr=cur_lr)
+# Encode anchor to each feature maps
 encoder = DataEncoder(cls_thresh=0.5, nms_thresh=0.2)
-
-# tensorboard visualize
+# Tensorboard visualize recorder
 writer = SummaryWriter(logdir=args.logdir)
 
 t0 = time.time()
-
 for epoch in range(start_epoch, 10000):
     if iteration > args.max_iter:
         break
 
     for inputs, loc_targets, cls_targets in trainloader:
+        # prepare data and cls & loc label
         inputs = Variable(inputs.cuda())
         loc_targets = Variable(loc_targets.cuda())
         cls_targets = Variable(cls_targets.cuda())
-        #print(' inputs: ', inputs, '\n loc_targets: ',loc_targets, '\n cls_targets',cls_targets)
         optimizer.zero_grad()
         # predict result
         loc_preds, cls_preds = net(inputs)
@@ -179,11 +191,13 @@ for epoch in range(start_epoch, 10000):
         # optimizing - stochastic gradient descendent
         optimizer.step()
 
-        if iteration % 1 == 0:
+        # Recording intermediate log
+        if iteration % 20 == 0:
             t1 = time.time()
             print('iter ' + repr(iteration) + ' (epoch ' + repr(epoch) + ') || loss: %.4f || l loc_loss: %.4f || l cls_loss: %.4f (Time : %.1f)'\
                  % (loss.sum().item(), loc_loss.sum().item(), cls_loss.sum().item(), (t1 - t0)))
             t0 = time.time()
+            # record log and visualization by tensorboard
             writer.add_scalar('loc_loss', loc_loss.sum().item(), iteration)
             writer.add_scalar('cls_loss', cls_loss.sum().item(), iteration)
             writer.add_scalar('loss', loss.sum().item(), iteration)
@@ -206,9 +220,9 @@ for epoch in range(start_epoch, 10000):
             writer.add_image('image', img_tensor=infer_img, global_step=iteration, dataformats='HWC')
             writer.add_scalar('input_size', h, iteration)
             writer.add_scalar('learning_rate', cur_lr, iteration)
-
             t0 = time.time()
 
+        # Saving intermediate model
         if iteration % args.save_interval == 0 and iteration > 0:
             print('Saving state, iter : ', iteration)
             state = {
@@ -229,10 +243,11 @@ for epoch in range(start_epoch, 10000):
         if iteration > args.max_iter:
             break
 
+        # Evaluation while training
         if args.evaluation and iteration % args.eval_step == 0:
             try:
                 if pEval is None:
-                    print("Evaluation started at iteration {} on IC15...".format(iteration))
+                    print("Evaluation started at iteration {0} on {1}...".format(iteration, args.dataset))
                     eval_cmd = "CUDA_VISIBLE_DEVICES=" + str(args.eval_device) + \
                                     " python eval.py" + \
                                     " --tune_from=" + args.save_folder + 'ckpt_' + repr(iteration) + '.pth' + \
