@@ -44,7 +44,7 @@ class RetinaNet(nn.Module):
         for _ in range(4):
             layers.append(nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1))
             layers.append(nn.ReLU(True))
-        # textbox layer --> 3*5 Conv
+        # change the last predict 3x3 conv layer to textbox layer --> 3*5 Conv
         layers.append(nn.Conv2d(256, out_planes, kernel_size=(3, 5), stride=1, padding=(1, 2)))
         return nn.Sequential(*layers)
 

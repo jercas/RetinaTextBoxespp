@@ -19,7 +19,7 @@ def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1", "Yes", "Y", "True", "T")
 
 parser = argparse.ArgumentParser(description='PyTorch RetinaNet Evaluating')
-parser.add_argument('--input_size', '-i', default=1280,
+parser.add_argument('--input_size', '-i', default=768,
                                                                     type=int, help='Model input size')
 parser.add_argument('--cls_thresh', '-c', default=0.4,
                                                                     type=float, help='Classification threshold')
@@ -49,14 +49,14 @@ net.eval()
 encoder = DataEncoder(args.cls_thresh, args.nms_thresh)
 
 # test image path & list
-img_dir = "./DB/ICDAR2015/test/" if args.dataset in ["ICDAR2015"] else "./DB/ICDAR2013/test/"
+img_dir = "./DB/{0}/test/".format(args.dataset)
 val_list = [im for im in os.listdir(img_dir) if "jpg" in im]
 
 if not os.path.exists(args.output_zip):
     os.mkdir(args.output_zip)
 
 # save results dir & zip
-eval_dir = "icdar2015" if args.dataset in ["ICDAR2015"] else "icdar2013"
+eval_dir = args.dataset
 result_zip = zipfile.ZipFile(eval_dir + args.output_zip + '.zip', 'w')
 
 _multi_scale = [608, 640, 672, 704, 736, 768, 800, 832, 864, 896, 928, 960, 992, 1024, 1056, 1088, 1120, 1152, 1184, 1216, 1248, 1280]
@@ -108,7 +108,7 @@ for n, _img in enumerate(val_list):
         #print(gt_anno)
 
         for label in gt_anno:
-            if args.dataset in ["ICDAR2015"]:
+            if args.dataset in ["ICDAR2015", "PLATE"]:
                 # ICDAR2015 -> 8 coordinates
                 _x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3, txt = label.split(",")[:9]
                 # green -> recognition required gt label. (b,g,r)
@@ -130,7 +130,7 @@ for n, _img in enumerate(val_list):
                 _xmin, _ymin, _xmax, _ymax = label.split(",")[:4]
                 img = cv2.rectangle(img, (int(_xmin), int(_ymin)), (int(_xmax), int(_ymax)), (0,255,0), 2)
 
-        if args.dataset in ["ICDAR2015"]:
+        if args.dataset in ["ICDAR2015", "PLATE"]:
             # red -> prediction. (b,g,r)
             img = cv2.polylines(img, quad_boxes, True, (0,0,255), 2)
         else:
@@ -152,7 +152,7 @@ for n, _img in enumerate(val_list):
         result_zip.write(filename=save_img_dir + _img, arcname=_img, compress_type=zipfile.ZIP_DEFLATED)
 
     for i, quad in enumerate(quad_boxes):
-        if args.dataset in ["ICDAR2015"]:
+        if args.dataset in ["ICDAR2015", "PLATE"]:
             [x0, y0], [x1, y1], [x2, y2], [x3, y3] = quad
             f.write("%d,%d,%d,%d,%d,%d,%d,%d\t\t%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3, scores[iS]))
 

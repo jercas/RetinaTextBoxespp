@@ -265,4 +265,6 @@ def test():
     for fm in fms:
         print(fm.size())
 
-#test()
+
+if __name__ == '__main__':
+    test()

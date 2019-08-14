@@ -25,12 +25,12 @@ from encoder import DataEncoder
 from torch.autograd import Variable
 
 # Indicate visible gpu device
-device_ids = [3,4,5,6]
+device_ids = [2,3,4,6]
 os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, device_ids))
 
 # Multi-semantic transform
 def str2bool(v):
-    return v.lower() in ("yes", "y", "true", "t", "1")
+    return v.lower() in ("yes", "y", "true", "t", "1", "Yes", "Y", "True", "T")
 
 # Dynamic adjust lr
 def adjust_learning_rate(cur_lr, optimizer, gamma, step):
@@ -52,7 +52,7 @@ parser.add_argument('--batch_size', default=8,
                                                         type=int, help='Batch size for training')
 parser.add_argument('--num_workers', default=8,
                                                         type=int, help='Number of workers used in data loading')
-parser.add_argument('--resume', default=None,
+parser.add_argument('--resume', default='./models',
                                                         type=str,  help='resume from checkpoint')
 parser.add_argument('--dataset', default='ICDAR2015',
                                                         type=str, help='select training dataset')
@@ -62,15 +62,15 @@ parser.add_argument('--focal_loss', default=True,
                                                         type=str2bool, help='Use Focal loss or OHEM loss')
 parser.add_argument('--logdir', default='./logs/',
                                                         type=str, help='Tensorboard log dir')
-parser.add_argument('--max_iter', default=1200000,
+parser.add_argument('--max_iter', default=120000,
                                                         type=int, help='Number of training iterations')
 parser.add_argument('--gamma', default=0.5,
                                                         type=float, help='Gamma update for SGD')
-parser.add_argument('--save_interval', default=500,
+parser.add_argument('--save_interval', default=5000,
                                                         type=int, help='Frequency for saving checkpoint models')
 parser.add_argument('--save_folder', default='./models/',
                                                         type=str, help='Location to save checkpoint models')
-parser.add_argument('--evaluation', default=True,
+parser.add_argument('--evaluation', default=False,
                                                         type=str2bool, help='Evaulation during training')
 parser.add_argument('--eval_step', default=1000,
                                                         type=int, help='Evauation step')
@@ -138,8 +138,7 @@ if args.resume:
     iteration = checkpoint['iteration']
     cur_lr = checkpoint['lr']
     step_index = checkpoint['step_index']
-    print(" net: {0}\n start_epoch: {1}\n iteration: {2}\n current_lr: {3}\n step_index: {4}\n".format(
-        start_epoch, iteration, cur_lr,step_index))
+    print(" net: {0}\n start_epoch: {1}\n iteration: {2}\n current_lr: {3}\n step_index: {4}\n".format(net, start_epoch, iteration, cur_lr, step_index))
     #optimizer.load_state_dict(state["optimizer"])
 
 print('==>training detail...\n')
@@ -215,9 +214,10 @@ for epoch in range(start_epoch, 10000):
             boxes = boxes.reshape(-1, 4, 2).astype(np.int32)
 
             if boxes.shape[0] is not 0:
-                infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 4)
+                infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 1)
 
             writer.add_image('image', img_tensor=infer_img, global_step=iteration, dataformats='HWC')
+
             writer.add_scalar('input_size', h, iteration)
             writer.add_scalar('learning_rate', cur_lr, iteration)
             t0 = time.time()
