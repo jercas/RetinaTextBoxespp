@@ -13,6 +13,7 @@ from retinanet import RetinaNet
 from encoder import DataEncoder
 from PIL import Image, ImageDraw
 
+# usage: python eval.py --cls_thresh=0.5 --nms_thresh=0.1 --dataset=PLATE --tune_from=./models/ckpt_30000.pth --save_img_dir=./PLATE_test_result/
 os.environ["CUDA_VISIBLE_DEVICES"] = '6,7'
 
 def str2bool(v):

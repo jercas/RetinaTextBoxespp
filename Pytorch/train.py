@@ -40,7 +40,7 @@ def adjust_learning_rate(cur_lr, optimizer, gamma, step):
     return lr
 
 # usage:
-# CUDA_VISIBLE_DEVICES=6,7 python train.py --root=./DB/ --dataset=PLATE --batch_size=16 --multi_scale=True --logdir=logs/multi_step1/ --save_folder=models/multi_step1/ --num_workers=6
+# CUDA_VISIBLE_DEVICES= python train.py --root=./DB/ --dataset=PLATE --batch_size=8 --multi_scale=True --logdir=logs --save_folder=models --num_workers=6
 parser = argparse.ArgumentParser(description='PyTorch RetinaTextBoxes++ Training')
 parser.add_argument('--root', default='./DB/',
                                                         type=str, help='root of the dataset dir')
@@ -62,18 +62,18 @@ parser.add_argument('--focal_loss', default=True,
                                                         type=str2bool, help='Use Focal loss or OHEM loss')
 parser.add_argument('--logdir', default='./logs/',
                                                         type=str, help='Tensorboard log dir')
-parser.add_argument('--max_iter', default=120000,
+parser.add_argument('--max_iter', default=60000,
                                                         type=int, help='Number of training iterations')
 parser.add_argument('--gamma', default=0.5,
                                                         type=float, help='Gamma update for SGD')
-parser.add_argument('--save_interval', default=5000,
+parser.add_argument('--save_interval', default=2000,
                                                         type=int, help='Frequency for saving checkpoint models')
 parser.add_argument('--save_folder', default='./models/',
                                                         type=str, help='Location to save checkpoint models')
 parser.add_argument('--evaluation', default=False,
-                                                        type=str2bool, help='Evaulation during training')
+                                                        type=str2bool, help='Evaluation during training')
 parser.add_argument('--eval_step', default=1000,
-                                                        type=int, help='Evauation step')
+                                                        type=int, help='Evaluation step')
 parser.add_argument('--eval_device', default=2,
                                                         type=int, help='GPU device for evaluation')
 parser.add_argument('--cls_thresh', default=0.5,
@@ -167,6 +167,8 @@ optimizer = optim.SGD(net.parameters(), lr=cur_lr, momentum=0.9, weight_decay=1e
 encoder = DataEncoder(cls_thresh=0.5, nms_thresh=0.2)
 # Tensorboard visualize recorder
 writer = SummaryWriter(logdir=args.logdir)
+lossest = 1
+save_lossest = False
 
 t0 = time.time()
 for epoch in range(start_epoch, 10000):
@@ -222,8 +224,12 @@ for epoch in range(start_epoch, 10000):
             writer.add_scalar('learning_rate', cur_lr, iteration)
             t0 = time.time()
 
+        if loss.sum().item() < lossest:
+            lossest = loss.sum().item()
+            save_lossest = True
+
         # Saving intermediate model
-        if iteration % args.save_interval == 0 and iteration > 0:
+        if iteration % args.save_interval == 0 and iteration > 0 or save_lossest == True:
             print('Saving state, iter : ', iteration)
             state = {
                 'net': net.module.state_dict(),
@@ -235,6 +241,7 @@ for epoch in range(start_epoch, 10000):
             }
             model_file = args.save_folder + 'ckpt_' + repr(iteration) + '.pth'
             torch.save(state, model_file)
+            save_lossest = False
 
         if iteration in stepvalues:
             step_index += 1
