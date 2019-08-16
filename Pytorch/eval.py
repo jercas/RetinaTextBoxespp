@@ -67,7 +67,7 @@ if not os.path.exists(args.output_zip):
 
 # save results dir & zip
 eval_dir = args.dataset
-result_zip = zipfile.ZipFile(eval_dir + args.output_zip + '.zip', 'w')
+result_zip = zipfile.ZipFile(eval_dir + args.output_zip + '_cls{0}_nms{1}.zip'.format(args.cls_thresh, args.nms_thresh), 'w')
 
 _multi_scale = [608, 640, 672, 704, 736, 768, 800, 832, 864, 896, 928, 960, 992, 1024, 1056, 1088, 1120, 1152, 1184, 1216, 1248, 1280]
 multi_scale = np.array(_multi_scale)
@@ -172,7 +172,7 @@ for n, _img in enumerate(val_list):
             os.mkdir(save_img_dir)
 
         # save the output processed image.
-        save_suffix = _img if args.dataset in ['ICDAR2015'] else n
+        save_suffix = _img if args.dataset in ['ICDAR2015'] else _img[16].split('/')[-1]
         img_save_path = os.path.join(save_img_dir, save_suffix)
         cv2.imwrite(img_save_path, img)
         # compress output image.
