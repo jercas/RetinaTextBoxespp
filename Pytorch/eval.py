@@ -1,8 +1,12 @@
+#coding=utf-8
 import os
+import io
+import sys
 import cv2
 import zipfile
 import argparse
 import numpy as np
+import pandas as pd
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -14,7 +18,7 @@ from encoder import DataEncoder
 from PIL import Image, ImageDraw
 
 # usage: python eval.py --cls_thresh=0.5 --nms_thresh=0.1 --dataset=PLATE --tune_from=./models/ckpt_30000.pth --save_img_dir=./PLATE_test_result/
-os.environ["CUDA_VISIBLE_DEVICES"] = '6,7'
+os.environ["CUDA_VISIBLE_DEVICES"] = '0, 1'
 
 def str2bool(v):
     return v.lower() in ("yes", "y", "true", "t", "1", "Yes", "Y", "True", "T")
@@ -50,8 +54,13 @@ net.eval()
 encoder = DataEncoder(args.cls_thresh, args.nms_thresh)
 
 # test image path & list
-img_dir = "./DB/{0}/test/".format(args.dataset)
-val_list = [im for im in os.listdir(img_dir) if "jpg" in im]
+if args.dataset in ['ICDAR2015']:
+    img_dir = "./DB/{0}/test/".format(args.dataset)
+    val_list = [im for im in os.listdir(img_dir) if "jpg" in im]
+else:
+    img_dir = os.path.join('./DB', args.dataset)
+    dataset = pd.read_csv(os.path.join(img_dir, 'dataset_test.csv'), encoding='utf-8')
+    val_list = np.array(dataset)
 
 if not os.path.exists(args.output_zip):
     os.mkdir(args.output_zip)
@@ -64,12 +73,13 @@ _multi_scale = [608, 640, 672, 704, 736, 768, 800, 832, 864, 896, 928, 960, 992,
 multi_scale = np.array(_multi_scale)
 
 for n, _img in enumerate(val_list):
-    #print("infer : %d / %d" % (n, len(val_list)), end='\r')
-    save_file = "res_%s.txt" % (_img[:-4])
-    f = open(args.output_zip + "/res_%s.txt" % (_img[:-4]), "w")
-    print("save [%d/%d] %s" % (n, len(val_list), save_file), end='\r')
+    print("infer : %d / %d" % (n, len(val_list)), end='\r')
+    suffix = _img[:-4] if args.dataset in ['ICDAR2015'] else n
+    save_file = "res_%s.txt" % suffix
+    f = open(args.output_zip + "/res_%s.txt" % suffix, "w")
 
-    img = cv2.imread(img_dir + _img)
+    img_path = (img_dir + _img) if args.dataset in ['ICDAR2015'] else _img[16]
+    img = cv2.imread(img_path)
     height, width, _ = img.shape
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
@@ -104,16 +114,19 @@ for n, _img in enumerate(val_list):
         img = np.array(img, dtype=np.uint8)
         
         # draw gt points
-        gt_anno = open(img_dir + "gt/gt_%s.txt" % (_img[:-4]), "r")
-        gt_anno = gt_anno.readlines()
-        #print(gt_anno)
+        if args.dataset == ["ICDAR2015"]:
+            gt_anno = open(img_dir + "gt/gt_%s.txt" % (_img[:-4]), "r")
+            gt_anno = gt_anno.readlines()
+        else:
+            gt_anno = np.array([_img[0:8], _img[8:16]])
+            img_h, img_w = _img[17], _img[18]
 
         for label in gt_anno:
-            if args.dataset in ["ICDAR2015", "PLATE"]:
+            if args.dataset in ["ICDAR2015"]:
                 # ICDAR2015 -> 8 coordinates
                 _x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3, txt = label.split(",")[:9]
-                # green -> recognition required gt label. (b,g,r)
-                color = (0, 255, 0)
+                # red -> recognition required gt label. (b,g,r)
+                color = (0, 0, 255)
                 if "###" in txt:
                     # yellow -> unconcerned gt label. (b,g,r)
                     color = (0, 255, 255)
@@ -125,15 +138,27 @@ for n, _img in enumerate(val_list):
 
                 gt_point = np.array([_x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3], dtype=np.int32)
                 gt_point = gt_point.reshape(-1, 4, 2)
-                img = cv2.polylines(img, [gt_point], True, color, 2)
-            else:
+                img = cv2.polylines(img, [gt_point], True, color, 1)
+
+            elif args.dataset in ["ICDAR2013"]:
                 # ICDAR2013 -> 4 coordinates
+                _ymax: object
                 _xmin, _ymin, _xmax, _ymax = label.split(",")[:4]
                 img = cv2.rectangle(img, (int(_xmin), int(_ymin)), (int(_xmax), int(_ymax)), (0,255,0), 2)
 
+            else:
+                # PLATE -> 8 coordinates
+                _x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3 = \
+                    label[0] * img_w, label[1] * img_h, label[2] * img_w, label[3] * img_h, \
+                    label[4] * img_w, label[5] * img_h, label[6] * img_w, label[7] * img_h
+                color = (0, 255, 255)
+                gt_point = np.array([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3], dtype=np.int32)
+                gt_point = gt_point.reshape(-1, 4, 2)
+                img = cv2.polylines(img, [gt_point], True, color, 1)
+
         if args.dataset in ["ICDAR2015", "PLATE"]:
-            # red -> prediction. (b,g,r)
-            img = cv2.polylines(img, quad_boxes, True, (0,0,255), 2)
+            # green -> prediction. (b,g,r)
+            img = cv2.polylines(img, quad_boxes, True, (0, 255, 0), 1)
         else:
             for quad in quad_boxes:
                 xmin = np.min(quad[:, 0])
@@ -145,17 +170,18 @@ for n, _img in enumerate(val_list):
         save_img_dir = args.save_img_dir
         if not os.path.exists(save_img_dir):
             os.mkdir(save_img_dir)
+
         # save the output processed image.
-        img_save_path = os.path.join(save_img_dir, _img)
-        #print(img_save_path)
+        save_suffix = _img if args.dataset in ['ICDAR2015'] else n
+        img_save_path = os.path.join(save_img_dir, save_suffix)
         cv2.imwrite(img_save_path, img)
         # compress output image.
-        result_zip.write(filename=save_img_dir + _img, arcname=_img, compress_type=zipfile.ZIP_DEFLATED)
+        result_zip.write(filename=img_save_path, arcname=save_suffix, compress_type=zipfile.ZIP_DEFLATED)
 
     for i, quad in enumerate(quad_boxes):
         if args.dataset in ["ICDAR2015", "PLATE"]:
             [x0, y0], [x1, y1], [x2, y2], [x3, y3] = quad
-            f.write("%d,%d,%d,%d,%d,%d,%d,%d\t\t%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3, scores[iS]))
+            f.write("%d,%d,%d,%d,%d,%d,%d,%d\t\t%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3, scores[i]))
 
         else:
             xmin = np.min(quad[:, 0])
@@ -167,7 +193,7 @@ for n, _img in enumerate(val_list):
     f.close()
     # compress prediction info of bbox.
     result_zip.write(filename=args.output_zip + "/" + save_file, arcname=save_file, compress_type=zipfile.ZIP_DEFLATED)
-    os.remove(args.output_zip + "/res_%s.txt" % (_img[:-4]))
+    os.remove(args.output_zip + "/res_%s.txt" % (suffix))
 
 result_zip.close()
 

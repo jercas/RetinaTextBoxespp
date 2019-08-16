@@ -40,7 +40,7 @@ def adjust_learning_rate(cur_lr, optimizer, gamma, step):
     return lr
 
 # usage:
-# CUDA_VISIBLE_DEVICES= python train.py --root=./DB/ --dataset=PLATE --batch_size=8 --multi_scale=True --logdir=logs --save_folder=models --num_workers=6
+# CUDA_VISIBLE_DEVICES= python train.py --root=./DB/ --dataset=PLATE --batch_size=8 --multi_scale=True --logdir=./logs --save_folder=./models --num_workers=6 --input_size=960 --resume=./models/ckpt_40000.pth
 parser = argparse.ArgumentParser(description='PyTorch RetinaTextBoxes++ Training')
 parser.add_argument('--root', default='./DB/',
                                                         type=str, help='root of the dataset dir')
@@ -195,7 +195,7 @@ for epoch in range(start_epoch, 10000):
         # Recording intermediate log
         if iteration % 20 == 0:
             t1 = time.time()
-            print('iter ' + repr(iteration) + ' (epoch ' + repr(epoch) + ') || loss: %.4f || l loc_loss: %.4f || l cls_loss: %.4f (Time : %.1f)'\
+            print('iter ' + repr(iteration) + ' (epoch ' + repr(epoch) + ') || loss: %.4f || loc_loss: %.4f || cls_loss: %.4f (Time : %.1f)'\
                  % (loss.sum().item(), loc_loss.sum().item(), cls_loss.sum().item(), (t1 - t0)))
             t0 = time.time()
             # record log and visualization by tensorboard
@@ -219,7 +219,6 @@ for epoch in range(start_epoch, 10000):
                 infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 1)
 
             writer.add_image('image', img_tensor=infer_img, global_step=iteration, dataformats='HWC')
-
             writer.add_scalar('input_size', h, iteration)
             writer.add_scalar('learning_rate', cur_lr, iteration)
             t0 = time.time()
@@ -230,7 +229,7 @@ for epoch in range(start_epoch, 10000):
 
         # Saving intermediate model
         if iteration % args.save_interval == 0 and iteration > 0 or save_lossest == True:
-            print('Saving state, iter : ', iteration)
+            print('Saving model state at iteration : ', iteration)
             state = {
                 'net': net.module.state_dict(),
                 "optimizer": optimizer.state_dict(),
@@ -239,7 +238,7 @@ for epoch in range(start_epoch, 10000):
                 'lr' : cur_lr,
                 'step_index' : step_index
             }
-            model_file = args.save_folder + 'ckpt_' + repr(iteration) + '.pth'
+            model_file = "{0}/ckpt_{1}_loss_{2}.pth".format(args.save_folder, repr(iteration), lossest)
             torch.save(state, model_file)
             save_lossest = False
 
