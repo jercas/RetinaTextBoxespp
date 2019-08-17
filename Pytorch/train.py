@@ -52,7 +52,7 @@ parser.add_argument('--batch_size', default=8,
                                                         type=int, help='Batch size for training')
 parser.add_argument('--num_workers', default=8,
                                                         type=int, help='Number of workers used in data loading')
-parser.add_argument('--resume', default='./models',
+parser.add_argument('--resume',
                                                         type=str,  help='resume from checkpoint')
 parser.add_argument('--dataset', default='ICDAR2015',
                                                         type=str, help='select training dataset')
@@ -66,7 +66,7 @@ parser.add_argument('--max_iter', default=60000,
                                                         type=int, help='Number of training iterations')
 parser.add_argument('--gamma', default=0.5,
                                                         type=float, help='Gamma update for SGD')
-parser.add_argument('--save_interval', default=2000,
+parser.add_argument('--save_interval', default=5000,
                                                         type=int, help='Frequency for saving checkpoint models')
 parser.add_argument('--save_folder', default='./models/',
                                                         type=str, help='Location to save checkpoint models')
@@ -76,9 +76,9 @@ parser.add_argument('--eval_step', default=1000,
                                                         type=int, help='Evaluation step')
 parser.add_argument('--eval_device', default=2,
                                                         type=int, help='GPU device for evaluation')
-parser.add_argument('--cls_thresh', default=0.5,
+parser.add_argument('--cls_thresh', default=0.4,
                                                         type=int, help='classification thresh')
-parser.add_argument('--nms_thresh', default=0.35,
+parser.add_argument('--nms_thresh', default=0.2,
                                                         type=int, help='nms thresh')
 args = parser.parse_args()
 
@@ -216,7 +216,7 @@ for epoch in range(start_epoch, 10000):
             boxes = boxes.reshape(-1, 4, 2).astype(np.int32)
 
             if boxes.shape[0] is not 0:
-                infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 1)
+                infer_img = cv2.polylines(infer_img, boxes, True, (0,255,0), 2)
 
             writer.add_image('image', img_tensor=infer_img, global_step=iteration, dataformats='HWC')
             writer.add_scalar('input_size', h, iteration)
