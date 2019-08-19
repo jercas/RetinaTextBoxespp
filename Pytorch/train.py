@@ -62,7 +62,7 @@ parser.add_argument('--focal_loss', default=True,
                                                         type=str2bool, help='Use Focal loss or OHEM loss')
 parser.add_argument('--logdir', default='./logs/',
                                                         type=str, help='Tensorboard log dir')
-parser.add_argument('--max_iter', default=60000,
+parser.add_argument('--max_iter', default=40000,
                                                         type=int, help='Number of training iterations')
 parser.add_argument('--gamma', default=0.5,
                                                         type=float, help='Gamma update for SGD')
