@@ -76,9 +76,9 @@ parser.add_argument('--eval_step', default=1000,
                                                         type=int, help='Evaluation step')
 parser.add_argument('--eval_device', default=2,
                                                         type=int, help='GPU device for evaluation')
-parser.add_argument('--cls_thresh', default=0.4,
+parser.add_argument('--cls_thresh', default=0.5,
                                                         type=int, help='classification thresh')
-parser.add_argument('--nms_thresh', default=0.1,
+parser.add_argument('--nms_thresh', default=0.25,
                                                         type=int, help='nms thresh')
 args = parser.parse_args()
 

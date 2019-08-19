@@ -144,13 +144,15 @@ for n, _img in enumerate(val_list):
                 # ICDAR2013 -> 4 coordinates
                 _ymax: object
                 _xmin, _ymin, _xmax, _ymax = label.split(",")[:4]
-                img = cv2.rectangle(img, (int(_xmin), int(_ymin)), (int(_xmax), int(_ymax)), (0,255,0), 2)
+                # yellow -> gt label. (b,g,r)
+                img = cv2.rectangle(img, (int(_xmin), int(_ymin)), (int(_xmax), int(_ymax)), (0,255,255), 2)
 
             else:
                 # PLATE -> 8 coordinates
                 _x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3 = \
                     label[0] * img_w, label[1] * img_h, label[2] * img_w, label[3] * img_h, \
                     label[4] * img_w, label[5] * img_h, label[6] * img_w, label[7] * img_h
+                # yellow -> gt label. (b, g, r)
                 color = (0, 255, 255)
                 gt_point = np.array([_x0, _y0, _x1, _y1, _x2, _y2, _x3, _y3], dtype=np.int32)
                 gt_point = gt_point.reshape(-1, 4, 2)
