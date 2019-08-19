@@ -26,9 +26,9 @@ def str2bool(v):
 parser = argparse.ArgumentParser(description='PyTorch RetinaNet Evaluating')
 parser.add_argument('--input_size', '-i', default=768,
                                                                     type=int, help='Model input size')
-parser.add_argument('--cls_thresh', '-c', default=0.4,
+parser.add_argument('--cls_thresh', '-c', default=0.5,
                                                                     type=float, help='Classification threshold')
-parser.add_argument('--nms_thresh', '-n', default=0.1,
+parser.add_argument('--nms_thresh', '-n', default=0.2,
                                                                     type=float, help='NMS threshold')
 parser.add_argument('--dataset', '-d', default='ICDAR2015',
                                                                     type=str, help='evaluation dataset')
@@ -183,7 +183,7 @@ for n, _img in enumerate(val_list):
     for i, quad in enumerate(quad_boxes):
         if args.dataset in ["ICDAR2015", "PLATE"]:
             [x0, y0], [x1, y1], [x2, y2], [x3, y3] = quad
-            f.write("%d,%d,%d,%d,%d,%d,%d,%d\t\t%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3, scores[i]))
+            f.write("%d,%d,%d,%d,%d,%d,%d,%d\n" % (x0, y0, x1, y1, x2, y2, x3, y3))
 
         else:
             xmin = np.min(quad[:, 0])
@@ -195,12 +195,11 @@ for n, _img in enumerate(val_list):
     f.close()
     # compress prediction info of bbox.
     result_zip.write(filename=args.output_zip + "/" + save_file, arcname=save_file, compress_type=zipfile.ZIP_DEFLATED)
-    os.remove(args.output_zip + "/res_%s.txt" % (suffix))
+    #os.remove(args.output_zip + "/res_%s.txt" % (suffix))
 
 result_zip.close()
 
 import subprocess
-
 #query = "python %sscript.py -g=%sgt.zip -s=%s" % (eval_dir, eval_dir, eval_dir+args.output_zip)
 # return value
 #subprocess.call(query, shell=True)
